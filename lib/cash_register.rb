@@ -1,43 +1,48 @@
-class CashRegister
-  attr_accessor :total, :discount, :price, :items
+class CashRegister 
+  attr_accessor :discount, :total
 
-  def initialize(discount = 0)
+  def initialize(discount=0)
+    @discount = discount 
     @total = 0
-    @discount = discount
     @items = []
-  end
-
-  def add_item(item, price, quantity = 1)
-    @price = price
-    @total += price * quantity
-    if quantity > 1
-      counter = 0
-      while counter < quantity
-        @items << item
-        counter += 1
-      end
-    else
-      @items << item
-    end
-  end
-
+    @last_item = [] 
+  end 
+  
   def apply_discount
-    if @discount > 0
-      @to_take_off = (price * discount)/100
-      @total -= @to_take_off
-      return "After the discount, the total comes to $#{total}."
-    else
-      return "There is no discount to apply."
-    end
-  end
-
-  def void_last_transaction
-    @total -= @price
-    if items.empty? 
-      self.total = 0.99
+    if discount != 0 
+      @total -= (@total * (@discount / 100.to_f))
+      "After the discount, the total comes to $#{@total.to_i}."
     else 
-      self.total -= @total 
-    end
-  end
+      "There is no discount to apply."
+    end 
+  end 
+  
+  def add_item(title, price, quantity=1)
+    @total += price * quantity 
+    quantity.times do 
+      @items << title 
+    end 
+    @last_item = price * quantity 
+  end 
+  
+  def items 
+    @items 
+  end 
+  
+  def void_last_transaction 
+     @items.delete_at(-1)
+    self.total = self.total - @last_item
+  end 
+end 
 
-end
+list = CashRegister.new(20) 
+list.add_item("eggs", 1.50, 3) => 4.50
+list.add_item("skirt steak", 7.99) => 7.99 
+list.add_item("apple pie", 3.99, 2) => 7.98
+list.total => 20.47
+list.items => ["eggs", "eggs", "eggs", "skirt steak", "apple pie", "apple pie"]
+list.apply_discount => "After the discount, the total comes to $16."
+list.void_last_transaction
+list.items  => ["eggs", "eggs", "eggs", "skirt steak", "apple pie"]
+list.total => 8.02
+list 
